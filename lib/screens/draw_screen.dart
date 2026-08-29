@@ -1,6 +1,11 @@
+// lib/screens/draw_screen.dart
 import 'package:flutter/material.dart';
 import '../models/stroke.dart';
 import '../widgets/pookalam_canvas.dart';
+import '../widgets/color_swatch_row.dart';
+import '../widgets/brush_size_row.dart';
+import '../constants/onam_palette.dart';
+import '../constants/brush_sizes.dart';
 
 class DrawScreen extends StatefulWidget {
   const DrawScreen({super.key});
@@ -13,9 +18,8 @@ class _DrawScreenState extends State<DrawScreen> {
   final GlobalKey _repaintBoundaryKey = GlobalKey();
   final List<Stroke> _strokes = [];
 
-  Color _currentColor =
-      Colors.deepOrange; // stand-in for marigold swatch, swap in step 4
-  double _currentWidth = 4.0; // stand-in for brush-size presets, swap in step 5
+  Color _currentColor = onamPalette[0]; // marigold default
+  double _currentWidth = brushMedium;
   bool _isEraser = false;
 
   void _undo() {
@@ -31,6 +35,17 @@ class _DrawScreenState extends State<DrawScreen> {
     setState(() => _isEraser = !_isEraser);
   }
 
+  void _selectColor(Color color) {
+    setState(() {
+      _currentColor = color;
+      _isEraser = false; // picking a color implies going back to pencil
+    });
+  }
+
+  void _selectWidth(double width) {
+    setState(() => _currentWidth = width);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +55,34 @@ class _DrawScreenState extends State<DrawScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Toolbar — bare bones for now, full palette/brush UI comes next
+              ColorSwatchRow(
+                selectedColor: _currentColor,
+                onColorSelected: _selectColor,
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 600,
+                      maxHeight: 600,
+                    ),
+                    child: PookalamCanvas(
+                      repaintBoundaryKey: _repaintBoundaryKey,
+                      currentColor: _currentColor,
+                      currentWidth: _currentWidth,
+                      isEraser: _isEraser,
+                      strokes: _strokes,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              BrushSizeRow(
+                selectedWidth: _currentWidth,
+                onWidthSelected: _selectWidth,
+              ),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -67,29 +109,9 @@ class _DrawScreenState extends State<DrawScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              // The square canvas — centered, responsive, capped so it
-              // doesn't blow past available height on short screens.
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 600,
-                      maxHeight: 600,
-                    ),
-                    child: PookalamCanvas(
-                      repaintBoundaryKey: _repaintBoundaryKey,
-                      currentColor: _currentColor,
-                      currentWidth: _currentWidth,
-                      isEraser: _isEraser,
-                      strokes: _strokes,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
-                  // Submit wiring comes in step 8-9 (RepaintBoundary -> image -> Worker)
+                  // Submit wiring: step 8-9
                 },
                 child: const Text('Submit Pookalam'),
               ),

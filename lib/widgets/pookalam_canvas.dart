@@ -1,4 +1,3 @@
-// lib/widgets/pookalam_canvas.dart
 import 'package:flutter/material.dart';
 import '../models/stroke.dart';
 
@@ -7,7 +6,7 @@ class PookalamCanvas extends StatefulWidget {
   final Color currentColor;
   final double currentWidth;
   final bool isEraser;
-  final List<Stroke> strokes; // lifted state, see note below
+  final List<Stroke> strokes;
 
   const PookalamCanvas({
     super.key,
@@ -25,8 +24,18 @@ class PookalamCanvas extends StatefulWidget {
 class _PookalamCanvasState extends State<PookalamCanvas> {
   Stroke? _activeStroke;
 
+  Offset _clampToCanvas(Offset point, Size canvasSize) {
+    return Offset(
+      point.dx.clamp(0.0, canvasSize.width),
+      point.dy.clamp(0.0, canvasSize.height),
+    );
+  }
+
   void _onPanStart(DragStartDetails details, RenderBox box) {
-    final local = box.globalToLocal(details.globalPosition);
+    final local = _clampToCanvas(
+      box.globalToLocal(details.globalPosition),
+      box.size,
+    );
     final stroke = Stroke(
       color: widget.isEraser ? Colors.white : widget.currentColor,
       width: widget.currentWidth,
@@ -40,7 +49,10 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
 
   void _onPanUpdate(DragUpdateDetails details, RenderBox box) {
     if (_activeStroke == null) return;
-    final local = box.globalToLocal(details.globalPosition);
+    final local = _clampToCanvas(
+      box.globalToLocal(details.globalPosition),
+      box.size,
+    );
     setState(() {
       _activeStroke!.points.add(local);
     });
@@ -59,7 +71,7 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
           return RepaintBoundary(
             key: widget.repaintBoundaryKey,
             child: Container(
-              color: Colors.white, // fixed canvas background
+              color: Colors.white,
               child: Builder(
                 builder: (ctx) {
                   return GestureDetector(
@@ -68,9 +80,11 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
                     onPanUpdate: (d) =>
                         _onPanUpdate(d, ctx.findRenderObject() as RenderBox),
                     onPanEnd: _onPanEnd,
-                    child: CustomPaint(
-                      painter: PookalamPainter(strokes: widget.strokes),
-                      size: Size.infinite,
+                    child: ClipRect(
+                      child: CustomPaint(
+                        painter: PookalamPainter(strokes: widget.strokes),
+                        size: Size.infinite,
+                      ),
                     ),
                   );
                 },

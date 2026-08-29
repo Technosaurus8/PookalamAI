@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "607809364234",
+    "project_id": "pookalamai",
+    "storage_bucket": "pookalamai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607809364234:android:02c04961da4a1acb169af3",
+        "android_client_info": {
+          "package_name": "com.example.pookalamai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxQspsZFnQjhDEO7q72gkksLVsT9UjGvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

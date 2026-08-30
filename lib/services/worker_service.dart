@@ -13,6 +13,7 @@ class WorkerService {
     );
 
     if (response.statusCode != 200) {
+      print('Worker returned ${response.statusCode}: ${response.body}');
       throw Exception(
         'Worker returned ${response.statusCode}: ${response.body}',
       );

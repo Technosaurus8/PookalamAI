@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pookalamai/screens/draw_screen.dart';
+import 'package:pookalamai/screens/leaderboard_screen.dart';
 
 // --- Design tokens (matches app-wide Onam palette) ---
 class _Palette {
@@ -52,22 +54,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   void _startDrawing() {
     final playerName = _resolvedName();
-    // TODO: replace with real navigation once CanvasScreen exists.
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            _PlaceholderScreen(title: 'Canvas — playerName: $playerName'),
-      ),
+      MaterialPageRoute(builder: (_) => DrawScreen(playerName: playerName)),
     );
   }
 
   void _openLeaderboard() {
-    // TODO: replace with real navigation once LeaderboardScreen exists.
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const _PlaceholderScreen(title: 'Leaderboard'),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const LeaderboardScreen()));
   }
 
   @override

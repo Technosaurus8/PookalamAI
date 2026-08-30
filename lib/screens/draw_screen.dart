@@ -60,6 +60,11 @@ class _DrawScreenState extends State<DrawScreen> {
     setState(() => _currentWidth = width);
   }
 
+  bool _isDrawingActive = false;
+
+  void _onStrokeStart() => setState(() => _isDrawingActive = true);
+  void _onStrokeEnd() => setState(() => _isDrawingActive = false);
+
   bool _isSubmitting = false;
 
   Future<void> _handleSubmit() async {
@@ -173,6 +178,7 @@ class _DrawScreenState extends State<DrawScreen> {
         backgroundColor: AppColors.green,
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.cream),
         title: Text('Pookalam.ai', style: AppText.heading(size: 20)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(18),
@@ -239,6 +245,8 @@ class _DrawScreenState extends State<DrawScreen> {
                   currentWidth: _currentWidth,
                   isEraser: _isEraser,
                   strokes: _strokes,
+                  onStrokeStart: _onStrokeStart,
+                  onStrokeEnd: _onStrokeEnd,
                 ),
               ),
             );
@@ -358,6 +366,9 @@ class _DrawScreenState extends State<DrawScreen> {
               thickness: 6,
               child: SingleChildScrollView(
                 controller: _scrollController,
+                physics: _isDrawingActive
+                    ? const NeverScrollableScrollPhysics()
+                    : const ClampingScrollPhysics(),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(

@@ -1,3 +1,4 @@
+// lib/widgets/pookalam_canvas.dart
 import 'package:flutter/material.dart';
 import '../models/stroke.dart';
 
@@ -7,6 +8,8 @@ class PookalamCanvas extends StatefulWidget {
   final double currentWidth;
   final bool isEraser;
   final List<Stroke> strokes;
+  final VoidCallback? onStrokeStart;
+  final VoidCallback? onStrokeEnd;
 
   const PookalamCanvas({
     super.key,
@@ -15,6 +18,8 @@ class PookalamCanvas extends StatefulWidget {
     required this.currentWidth,
     required this.isEraser,
     required this.strokes,
+    this.onStrokeStart,
+    this.onStrokeEnd,
   });
 
   @override
@@ -31,11 +36,9 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
     );
   }
 
-  void _onPanStart(DragStartDetails details, RenderBox box) {
-    final local = _clampToCanvas(
-      box.globalToLocal(details.globalPosition),
-      box.size,
-    );
+  void _onPointerDown(PointerDownEvent event, RenderBox box) {
+    widget.onStrokeStart?.call();
+    final local = _clampToCanvas(box.globalToLocal(event.position), box.size);
     final stroke = Stroke(
       color: widget.isEraser ? Colors.white : widget.currentColor,
       width: widget.currentWidth,
@@ -47,19 +50,22 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
     });
   }
 
-  void _onPanUpdate(DragUpdateDetails details, RenderBox box) {
+  void _onPointerMove(PointerMoveEvent event, RenderBox box) {
     if (_activeStroke == null) return;
-    final local = _clampToCanvas(
-      box.globalToLocal(details.globalPosition),
-      box.size,
-    );
+    final local = _clampToCanvas(box.globalToLocal(event.position), box.size);
     setState(() {
       _activeStroke!.points.add(local);
     });
   }
 
-  void _onPanEnd(DragEndDetails details) {
+  void _onPointerUp(PointerUpEvent event) {
     _activeStroke = null;
+    widget.onStrokeEnd?.call();
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _activeStroke = null;
+    widget.onStrokeEnd?.call();
   }
 
   @override
@@ -74,12 +80,14 @@ class _PookalamCanvasState extends State<PookalamCanvas> {
               color: Colors.white,
               child: Builder(
                 builder: (ctx) {
-                  return GestureDetector(
-                    onPanStart: (d) =>
-                        _onPanStart(d, ctx.findRenderObject() as RenderBox),
-                    onPanUpdate: (d) =>
-                        _onPanUpdate(d, ctx.findRenderObject() as RenderBox),
-                    onPanEnd: _onPanEnd,
+                  return Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (e) =>
+                        _onPointerDown(e, ctx.findRenderObject() as RenderBox),
+                    onPointerMove: (e) =>
+                        _onPointerMove(e, ctx.findRenderObject() as RenderBox),
+                    onPointerUp: _onPointerUp,
+                    onPointerCancel: _onPointerCancel,
                     child: ClipRect(
                       child: CustomPaint(
                         painter: PookalamPainter(strokes: widget.strokes),

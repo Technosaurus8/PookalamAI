@@ -1,7 +1,7 @@
-// lib/widgets/color_swatch_row.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../constants/onam_palette.dart';
+import '../theme/app_theme.dart';
 
 class ColorSwatchRow extends StatelessWidget {
   final Color selectedColor;
@@ -18,8 +18,8 @@ class ColorSwatchRow extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Pick a color'),
+        return AppDecor.themedDialog(
+          title: Text('Pick a color', style: AppText.heading(size: 18)),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: selectedColor,
@@ -31,14 +31,18 @@ class ColorSwatchRow extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: AppText.body(color: AppColors.green),
+              ),
             ),
             ElevatedButton(
+              style: AppDecor.primaryButton,
               onPressed: () {
                 onColorSelected(tempColor);
                 Navigator.of(ctx).pop();
               },
-              child: const Text('Select'),
+              child: Text('Select', style: AppText.button(size: 14)),
             ),
           ],
         );
@@ -50,17 +54,29 @@ class ColorSwatchRow extends StatelessWidget {
     final isSelected = color.value == selectedColor.value;
     return GestureDetector(
       onTap: () => onColorSelected(color),
-      child: Container(
-        width: 36,
-        height: 36,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        width: isSelected ? 42 : 36,
+        height: isSelected ? 42 : 36,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey.shade400,
-            width: isSelected ? 3 : 1,
+            color: isSelected
+                ? AppColors.gold
+                : AppColors.cream.withOpacity(0.35),
+            width: isSelected ? 3 : 1.5,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.gold.withOpacity(0.5),
+                    blurRadius: 8,
+                  ),
+                ]
+              : null,
         ),
       ),
     );
@@ -72,11 +88,18 @@ class ColorSwatchRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ...onamPalette.map(_swatch),
-        const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.palette_outlined),
-          tooltip: 'More colors',
-          onPressed: () => _openFullPicker(context),
+        const SizedBox(width: 10),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.cream.withOpacity(0.35)),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.palette_outlined),
+            color: AppColors.cream,
+            tooltip: 'More colors',
+            onPressed: () => _openFullPicker(context),
+          ),
         ),
       ],
     );

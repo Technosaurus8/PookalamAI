@@ -1,6 +1,6 @@
-// lib/widgets/brush_size_row.dart
 import 'package:flutter/material.dart';
 import '../constants/brush_sizes.dart';
+import '../theme/app_theme.dart';
 
 class BrushSizeRow extends StatelessWidget {
   final double selectedWidth;
@@ -18,28 +18,38 @@ class BrushSizeRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: GestureDetector(
         onTap: () => onWidthSelected(size),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.black87 : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(8),
+            color: isSelected
+                ? AppColors.gold
+                : AppColors.cream.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.gold
+                  : AppColors.cream.withOpacity(0.3),
+            ),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: size,
-                height: size,
+                width: size.clamp(6, 18),
+                height: size.clamp(6, 18),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? AppColors.green : AppColors.cream,
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 7),
               Text(
                 label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
-                  fontSize: 12,
+                style: AppText.body(
+                  size: 12,
+                  weight: FontWeight.w600,
+                  color: isSelected ? AppColors.green : AppColors.cream,
                 ),
               ),
             ],
@@ -64,16 +74,27 @@ class BrushSizeRow extends StatelessWidget {
         ),
         Row(
           children: [
-            const Icon(Icons.circle, size: 6, color: Colors.grey),
+            Icon(
+              Icons.circle,
+              size: 6,
+              color: AppColors.cream.withOpacity(0.6),
+            ),
             Expanded(
-              child: Slider(
-                min: 1.0,
-                max: 24.0,
-                value: selectedWidth.clamp(1.0, 24.0),
-                onChanged: onWidthSelected,
+              child: SliderTheme(
+                data: AppDecor.sliderTheme,
+                child: Slider(
+                  min: 1.0,
+                  max: 24.0,
+                  value: selectedWidth.clamp(1.0, 24.0),
+                  onChanged: onWidthSelected,
+                ),
               ),
             ),
-            const Icon(Icons.circle, size: 18, color: Colors.grey),
+            Icon(
+              Icons.circle,
+              size: 18,
+              color: AppColors.cream.withOpacity(0.6),
+            ),
           ],
         ),
       ],

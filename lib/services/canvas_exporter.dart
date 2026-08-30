@@ -10,6 +10,14 @@ class CanvasExporter {
   /// Captures the canvas, forces it to exactly [targetSize] x [targetSize],
   /// and returns a base64-encoded JPEG string sized to fit comfortably
   /// under Firestore's 1MB document limit.
+  ///
+  /// Note: Flutter Web has no isolate/compute() offloading (compute()
+  /// silently runs on the main thread on web), so the decode/resize/encode
+  /// work below is genuinely synchronous. We insert explicit
+  /// `Future.delayed(Duration.zero)` yields between the expensive steps so
+  /// the event loop gets a chance to actually paint the pending "submitting"
+  /// frame (spinner, disabled button) instead of it being starved until
+  /// the whole block finishes.
   static Future<String> exportToBase64({
     required GlobalKey repaintBoundaryKey,
     int targetSize = 512,
@@ -19,10 +27,6 @@ class CanvasExporter {
         repaintBoundaryKey.currentContext!.findRenderObject()
             as RenderRepaintBoundary;
 
-    // Canvas is square, so width == height. Capture at a pixelRatio that
-    // lands close to our target resolution — this way we're not throwing
-    // away detail by capturing huge and shrinking hard, regardless of
-    // whether the canvas rendered at 360px (phone) or 600px (desktop).
     final logicalSize = boundary.size.width;
     final pixelRatio = targetSize / logicalSize;
 
@@ -30,10 +34,13 @@ class CanvasExporter {
     final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
     final pngBytes = byteData!.buffer.asUint8List();
 
-    // Decode and force an EXACT 512x512 — toImage's pixelRatio math can be
-    // off by a pixel or two depending on the source size, and we want a
-    // guaranteed, consistent dimension for every submission.
+    // Yield before the CPU-heavy part starts, so any pending UI frame
+    // (e.g. the spinner swap from setState) gets to paint first.
+    await WidgetsBinding.instance.endOfFrame;
     final decoded = img.decodeImage(pngBytes)!;
+
+    await WidgetsBinding.instance.endOfFrame;
+
     final resized = img.copyResize(
       decoded,
       width: targetSize,
@@ -41,19 +48,20 @@ class CanvasExporter {
       interpolation: img.Interpolation.average,
     );
 
-    // JPEG, not PNG, for the stored image — flat-color line art compresses
-    // dramatically better as JPEG, and we don't need PNG's transparency
-    // since the canvas background is always solid white.
+    await WidgetsBinding.instance.endOfFrame;
+
     var quality = startingQuality;
     Uint8List jpgBytes = Uint8List.fromList(
       img.encodeJpg(resized, quality: quality),
     );
 
     // Safety net: an unusually dense/busy drawing could still come out
-    // large. Step quality down until comfortably under budget, leaving
-    // headroom in the 1MB doc cap for the strokes array + metadata fields.
+    // large. Step quality down until comfortably under budget, yielding
+    // between each retry so a multi-pass encode doesn't compound into one
+    // long unbroken block.
     const maxBase64Chars = 700 * 1024; // ~700KB of base64 text
     while (base64.encode(jpgBytes).length > maxBase64Chars && quality > 30) {
+      await WidgetsBinding.instance.endOfFrame;
       quality -= 15;
       jpgBytes = Uint8List.fromList(img.encodeJpg(resized, quality: quality));
     }

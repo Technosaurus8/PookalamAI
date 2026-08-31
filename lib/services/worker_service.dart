@@ -5,11 +5,14 @@ class WorkerService {
   static const String workerUrl =
       'https://pookalam-worker.amanmuhammed515.workers.dev';
 
-  static Future<Map<String, dynamic>> scoreImage(String base64Image) async {
+  static Future<Map<String, dynamic>> scoreImage(
+    String base64Image,
+    String playerName,
+  ) async {
     final response = await http.post(
       Uri.parse(workerUrl),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'imageBase64': base64Image}),
+      body: jsonEncode({'imageBase64': base64Image, 'playerName': playerName}),
     );
 
     if (response.statusCode != 200) {

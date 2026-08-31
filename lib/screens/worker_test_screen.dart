@@ -25,7 +25,7 @@ class _WorkerTestScreenState extends State<WorkerTestScreen> {
     try {
       final bytes = await rootBundle.load('assets/drawn_pookalam.png');
       final base64Image = base64Encode(bytes.buffer.asUint8List());
-      final result = await WorkerService.scoreImage(base64Image);
+      final result = await WorkerService.scoreImage(base64Image, "Test");
       setState(() => _result = result);
     } catch (e) {
       setState(() => _error = e.toString());

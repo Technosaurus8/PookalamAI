@@ -29,33 +29,4 @@ class LeaderboardEntry {
       createdAt: data['createdAt'] as Timestamp?,
     );
   }
-
-  /// For a brand-new submission that doesn't have a Firestore id/timestamp yet.
-  factory LeaderboardEntry.newSubmission({
-    required String playerName,
-    required String imageBase64,
-    required int score,
-    required String comment,
-  }) {
-    return LeaderboardEntry(
-      id: '',
-      playerName: playerName,
-      imageBase64: imageBase64,
-      score: score,
-      comment: comment,
-      createdAt: null,
-    );
-  }
-
-  /// Serializes for writing — server sets the real timestamp, id is
-  /// assigned by Firestore itself so it's intentionally excluded here.
-  Map<String, dynamic> toSubmissionMap() {
-    return {
-      'playerName': playerName,
-      'imageBase64': imageBase64,
-      'score': score,
-      'comment': comment,
-      'createdAt': FieldValue.serverTimestamp(),
-    };
-  }
 }

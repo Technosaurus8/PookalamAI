@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:pookalamai/services/leaderboard_service.dart';
 import 'package:pookalamai/services/worker_service.dart';
 import '../models/stroke.dart';
 import '../services/canvas_exporter.dart';
@@ -83,7 +82,10 @@ class _DrawScreenState extends State<DrawScreen> {
         repaintBoundaryKey: _repaintBoundaryKey,
       );
 
-      final result = await WorkerService.scoreImage(base64Image);
+      final result = await WorkerService.scoreImage(
+        base64Image,
+        widget.playerName,
+      );
       debugPrint(
         'playerName: "${widget.playerName}", length: ${widget.playerName.length}, type: ${widget.playerName.runtimeType}',
       );
@@ -92,18 +94,6 @@ class _DrawScreenState extends State<DrawScreen> {
       );
       final score = result['score'] as int;
       final comment = result['comment'] as String;
-      try {
-        await LeaderboardService.submitEntry(
-          playerName: widget.playerName,
-          imageBase64: base64Image,
-          score: score,
-          comment: comment,
-        );
-      } catch (e, stack) {
-        debugPrint('Submit failed: $e');
-        debugPrint('Stack: $stack');
-        rethrow;
-      }
 
       if (!mounted) return;
       setState(() => _isSubmitting = false);

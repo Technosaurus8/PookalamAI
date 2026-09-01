@@ -4,6 +4,8 @@ A solo freehand pookalam-drawing game with AI judging and a shared leaderboard �
 
 Draw a pookalam by hand on a digital canvas, get scored by Gemini AI on symmetry, color harmony, and creativity, and see how you rank against everyone else.
 
+🔗 Live app: pookalamai.web.app
+
 ## Features
 
 - **Freehand drawing canvas** — smooth quadratic Bezier strokes, Onam-themed color palette, adjustable brush sizes, eraser, undo/clear

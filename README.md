@@ -1,6 +1,6 @@
 # Pookalam.ai
 
-A solo freehand pookalam-drawing game with AI judging and a shared leaderboard — built for **ONAM.exe**, the IEEE SB VJCET hackathon.
+A solo freehand pookalam-drawing game with AI judging and a shared leaderboard — built for **ONAM.exe**, the IEEE SB VJCET Online Onam Game-Building Competition.
 
 Draw a pookalam by hand on a digital canvas, get scored by Gemini AI on symmetry, color harmony, and creativity, and see how you rank against everyone else.
 
